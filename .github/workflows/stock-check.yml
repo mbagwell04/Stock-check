@@ -1,0 +1,27 @@
+# Save this in your repo at: .github/workflows/stock-check.yml
+name: Stock check
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 min (GitHub may delay runs a few minutes)
+  workflow_dispatch:
+    inputs:
+      test_notify:
+        description: "Send a test push notification"
+        type: boolean
+        default: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check stock
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          TEST_NOTIFY: ${{ github.event.inputs.test_notify }}
+        run: python check_stock.py
